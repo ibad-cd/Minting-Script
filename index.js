@@ -171,7 +171,7 @@ async function main() {
                 horseNameDictionary[row[0]] = { name: row[16], animation: row[12] };
             })
             .on("end", async function () {
-                console.log("Horse Name Dictionary Complete - " + horseNameDictionary);
+                // console.log("Horse Name Dictionary Complete - " + horseNameDictionary);
                 callback(horseNameDictionary);
             })
             .on("error", function (error) {
@@ -216,7 +216,7 @@ async function main() {
     }
 
     importHorses(async (horseNameDictionary) => {
-        console.log(horseNameDictionary);
+        // console.log(horseNameDictionary);
         await processHorses(horseNameDictionary);
     });
 
