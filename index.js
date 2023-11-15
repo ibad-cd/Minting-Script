@@ -4,8 +4,7 @@ const fs = require('fs');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const { parse } = require("csv-parse");
 
-// const adminAddress = "CLcCqtTAwb2m2yFyLBxuLrqTDdsAZhAtTiCovwehvt7H"
-const adminAddress = "F2YgKD7rDYSntzPTohofUrWHZj2uEqrhDY9tpYs52FBz"
+const adminAddress = "CLcCqtTAwb2m2yFyLBxuLrqTDdsAZhAtTiCovwehvt7H"
 
 async function main() {
 
