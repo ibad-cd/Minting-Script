@@ -10,7 +10,7 @@ const adminAddress = "F2YgKD7rDYSntzPTohofUrWHZj2uEqrhDY9tpYs52FBz"
 async function main() {
 
     const ApiUrl = "https://ownersclub-api.invinciblegg.com/"
-    const ApiUrlSol = "https://dev-ownersclub-sol.invinciblegg.com/"
+    const ApiUrlSol = "https://ownersclub-sol.invinciblegg.com/"
 
     async function getHorseDetails(id, horseNameDictionary) {
         try {
