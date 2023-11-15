@@ -4,8 +4,6 @@ const fs = require('fs');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const { parse } = require("csv-parse");
 
-const adminAddress = "CLcCqtTAwb2m2yFyLBxuLrqTDdsAZhAtTiCovwehvt7H"
-
 async function main() {
 
     const ApiUrl = "https://ownersclub-api.invinciblegg.com/"
@@ -128,7 +126,7 @@ async function main() {
                     properties: {
                         creators: [
                             {
-                                address: adminAddress,
+                                address: "CLcCqtTAwb2m2yFyLBxuLrqTDdsAZhAtTiCovwehvt7H",
                                 verified: true,
                                 share: 100,
                             },
