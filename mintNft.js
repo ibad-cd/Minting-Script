@@ -1,3 +1,15 @@
+// ## Script Overview:
+
+// This script facilitates the minting of NFTs into an admin wallet. It involves several steps:
+// Fetching NFT details from an API.
+// Mapping old horse names to new ones using data from a CSV file, aiding in the setup of attributes and NFT clips.
+// Gathering horse IDs from another CSV file, which are essential for the minting process.
+// Maintaining an audit log in a separate CSV file to track successful minting, saving horse IDs and mint addresses.
+
+// ## Usage
+
+// Create a CSV file named "horsesData.csv" in the root directory containing columns for horse IDs, names, and animations.
+// Additionally, set up another CSV file in a folder named "csvs" specifically for storing horseIDs. This file will serve as the source from which the script retrieves the horseIDs.
 
 const axios = require('axios');
 const fs = require('fs');
@@ -162,7 +174,7 @@ async function main() {
 
     async function importHorses(callback) {
         let horseNameDictionary = {};
-        fs.createReadStream('./master_nft_output-series-A1.csv')
+        fs.createReadStream('./horsesData.csv')
             .pipe(parse({ delimiter: ",", from_line: 2 }))
             .on("data", function (row) {
                 horseNameDictionary[row[0]] = { name: row[16], animation: row[12] };

@@ -1,7 +1,14 @@
+// ## purpose, overview
+
+//  to update ownership of NFT in our DB so the nft will reflect in user profile
+// 
+// 
+
+
 
 const axios = require('axios');
 
-// const adminAddress = "CLcCqtTAwb2m2yFyLBxuLrqTDdsAZhAtTiCovwehvt7H"
+// const adminAddress = "CLcCqtTAwb2m2yFyLBxuLrqTDdsAZhAtTiCovwehvt7H" // john wallet address
 const adminAddress = "F2YgKD7rDYSntzPTohofUrWHZj2uEqrhDY9tpYs52FBz"
 
 
