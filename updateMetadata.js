@@ -6,14 +6,16 @@
 
 // Create a CSV file named "horsesData.csv" in the root directory containing columns for horse IDs, names, and animations.
 // Additionally, set up another CSV file in a folder named "csvs" for storing horseIDs and mint address.
+// to run this script open terminal and type node updateMetadata
 
 
 const axios = require('axios');
 const { parse } = require("csv-parse");
 const fs = require("fs");
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 
 const ApiUrl = "https://ownersclub-api.invinciblegg.com/"
-const ApiUrlSol = "https://dev-ownersclub-sol.invinciblegg.com/"
+const ApiUrlSol = "https://qa-ownersclub-sol.invinciblegg.com/"
 
 async function main() {
 
@@ -31,10 +33,12 @@ async function main() {
                         let traitValue = nftData[key];
                         if (key === "dam" || key === "sire") {
                             traitValue = traitValue.name;
-                        } else if (key === "name") {
+                        }
+                        else if (key === "name") {
                             console.log("horseID: ", id);
                             traitValue = horseNameDictionary[id].name;
-                        } else if (key === "gender") {
+                        } 
+                        else if (key === "gender") {
                             traitValue = horseGender[traitValue]
                         } else if (key === "bloodline") {
                             traitValue = bloodlineMapping[traitValue]
@@ -42,29 +46,30 @@ async function main() {
                             key = "color"
                             traitValue = horseColorMappings[traitValue]
                         } else if (key === "speed_trait_1") {
-                            traitValue = nftData["speed_trait_1_pwr"];
-                        } else if (key === "speed_trait_2") {
-                            traitValue = nftData["norm_speed"] >= 60 ? nftData["speed_trait_2_pwr"] : "LOCKED";
+                            traitValue = horseTraitsMapping[traitValue].name;
+                        }
+                        else if (key === "speed_trait_2") {
+                            traitValue = horseTraitsMapping[traitValue].name;
                         } else if (key === "speed_trait_3") {
-                            traitValue = nftData["norm_speed"] >= 70 ? nftData["speed_trait_3_pwr"] : "LOCKED";
+                            traitValue = horseTraitsMapping[traitValue].name;
                         } else if (key === "speed_trait_4") {
-                            traitValue = nftData["norm_speed"] >= 80 ? nftData["speed_trait_4_pwr"] : "LOCKED";
+                            traitValue = horseTraitsMapping[traitValue].name;
                         } else if (key === "stamina_trait_1") {
-                            traitValue = nftData["stamina_trait_1_pwr"];
+                            traitValue = horseTraitsMapping[traitValue].name;
                         } else if (key === "stamina_trait_2") {
-                            traitValue = nftData["norm_stamina"] >= 60 ? nftData["stamina_trait_2_pwr"] : "LOCKED";
+                            traitValue = horseTraitsMapping[traitValue].name;
                         } else if (key === "stamina_trait_3") {
-                            traitValue = nftData["norm_stamina"] >= 70 ? nftData["stamina_trait_3_pwr"] : "LOCKED";
+                            traitValue = horseTraitsMapping[traitValue].name;
                         } else if (key === "stamina_trait_4") {
-                            traitValue = nftData["norm_stamina"] >= 80 ? nftData["stamina_trait_4_pwr"] : "LOCKED";
+                            traitValue = horseTraitsMapping[traitValue].name;
                         } else if (key === "acceleration_trait_1") {
-                            traitValue = nftData["acceleration_trait_1_pwr"];
+                            traitValue = horseTraitsMapping[traitValue].name;
                         } else if (key === "acceleration_trait_2") {
-                            traitValue = nftData["norm_acceleration"] >= 60 ? nftData["acceleration_trait_2_pwr"] : "LOCKED";
+                            traitValue = horseTraitsMapping[traitValue].name;
                         } else if (key === "acceleration_trait_3") {
-                            traitValue = nftData["norm_acceleration"] >= 70 ? nftData["acceleration_trait_3_pwr"] : "LOCKED";
+                            traitValue = horseTraitsMapping[traitValue].name;
                         } else if (key === "acceleration_trait_4") {
-                            traitValue = nftData["norm_acceleration"] >= 80 ? nftData["acceleration_trait_4_pwr"] : "LOCKED";
+                            traitValue = horseTraitsMapping[traitValue].name;
                         }
                         return {
                             trait_type: key,
@@ -76,7 +81,7 @@ async function main() {
                 newAttr.push(
                     {
                         trait_type: "animation",
-                        value: horseNameDictionary[id].animation,
+                        value: horseAnimationMappings[horseNameDictionary[id].animation],
                     },
                     {
                         trait_type: "lifewin",
@@ -97,20 +102,22 @@ async function main() {
         }
     }
 
-    const updateNftMetadata = async (newAttr) => {
+    const updateNftMetadata = async (newAttr, tokenAddress) => {
         try {
             console.log("Updating NFT Metadata...")
 
-            const url = `${ApiUrlSol}update_attributes`;
+            const url = `${ApiUrlSol}updated_attributes_spNft`;
             const payload = {
-                tokenAddress: mintAddress,
+                tokenAddress: tokenAddress,
                 attributes: newAttr
             }
             const response = await axios.post(url, payload);
-            console.log(response.data)
+            console.log(response.data, "here:")
             if (response.data) {
                 console.log("NFT Metadata Success...")
-                return true
+                return {
+                    transactionHash: response.data.TransactionHash,
+                }
             } else {
                 console.log("NFT Metadata Failed...")
                 return false
@@ -142,17 +149,17 @@ async function main() {
         const csvPipe = fs.createReadStream('./csvs/old_nfts_to_update.csv').pipe(parse({ delimiter: ",", from_line: 2 }));
         csvPipe.on("data", async function (row) {
             csvPipe.pause();
-            const horseId = row[0];
-            const tokenAddress = row[1];
+            const tokenAddress = row[0];
+            const horseId = row[1];
 
             const horseResponse = await getHorseDetails(horseId, horseData)
             if (!horseResponse) { console.log("Error in horse details response"); return }
 
-            // const nftMetadataResponse = await updateNftMetadata(horseResponse.attributes, tokenAddress)
-            // if (!nftMetadataResponse) { console.log("Error in nftMetadataResponse response"); return }
+            const nftMetadataResponse = await updateNftMetadata(horseResponse.attributes, tokenAddress)
+            if (!nftMetadataResponse) { console.log("Error in nftMetadataResponse response"); return }
 
             // Gather data
-            const dataToWrite = gatherData(mintTransferResponse.mintData, horseId);
+            const dataToWrite = gatherData(horseId, tokenAddress, nftMetadataResponse.transactionHash);
 
             // Write data to CSV
             writeToCsv(dataToWrite);
@@ -168,6 +175,53 @@ async function main() {
 }
 
 main();
+
+
+// Function to gather data
+function gatherData(horseId, tokenAddress, tx) {
+    // Perform some operations to gather data
+    const newData = [
+        {
+            horseId: horseId,
+            tokenAddress: tokenAddress,
+            tx: tx,
+        },
+    ];
+
+    return newData;
+}
+
+// Function to write data to CSV file
+function writeToCsv(data) {
+    const csvFilePath = './csvs/newUpdateMetadataAudit.csv';
+
+    // Check if the file exists
+    const fileExists = fs.existsSync(csvFilePath);
+
+    // Create a CSV writer object with the appropriate options
+    const csvWriter = createCsvWriter({
+        path: csvFilePath,
+        header: [
+
+            { id: 'horseId', title: 'Horse Id' },
+            { id: 'tokenAddress', title: 'Mint Address' },
+            { id: 'tx', title: 'Transaction Hash' },
+        ],
+        append: fileExists, // Set 'append' to true if the file exists
+    });
+
+    // If the file doesn't exist, create it with a header
+    if (!fileExists) {
+        csvWriter.writeRecords([]) // Write an empty record to create the header
+            .then(() => console.log('CSV file created successfully'))
+            .catch((err) => console.error('Error creating CSV file:', err));
+    }
+
+    // Append new data to the CSV file
+    csvWriter.writeRecords(data)
+        .then(() => console.log('Data appended to CSV file successfully'))
+        .catch((err) => console.error('Error appending data to CSV file:', err));
+}
 
 
 
@@ -299,3 +353,118 @@ const horsesAttributesMappings = [
     "age",
     "rating",
 ];
+
+const horseTraitsMapping = {
+    "trait_small_size": {
+        "name": "Small Size",
+        //   "icon": Small
+    },
+    "trait_avg_size": {
+        "name": "Average Size",
+        //   "icon": Average
+    },
+    "trait_big_size": {
+        "name": "Big Size",
+        //   "icon": Big
+    },
+    "trait_colossus_size": {
+        "name": "Colossal Size",
+        //   "icon": Colossal
+    },
+    "trait_high_stride": {
+        "name": "High Stride",
+        //   "icon": HIghStrideRate
+    },
+    "trait_pony_strider": {
+        "name": "Pony Stride",
+        //   "icon": PonyStride
+    },
+    "trait_silky_stride": {
+        "name": "Silky Stride",
+        //   "icon": SilkyStride
+    },
+    "trait_long_strider": {
+        "name": "Long Stride",
+        //   "icon": LongStride
+    },
+    "trait_rip_quarters": {
+        "name": "Ripped Quarters",
+    },
+    "trait_muscular": {
+        "name": "Muscular",
+    },
+    "trait_athletic_build": {
+        "name": "Athletic Build",
+    },
+    "trait_plenty_of_bone": {
+        "name": "Plenty of Bone",
+    },
+    "trait_dirt_digger":{
+        "name": "Dirt Digger",
+    },
+    "trait_turner":{
+        "name": "Turner",
+    },
+    "trait_comf_runner":{
+        "name": "Comfortable Runner",
+    },
+    "trait_miler":{
+        "name": "Miler",
+    },
+    "trait_nice_and_hot":{
+        "name": "Nice and Hot",
+    },
+    "trait_wet_winner":{
+        "name": "Wet Winner",
+    },
+    "trait_del_motivation":{
+        "name": "Del Motivation",
+    },
+    "trait_starter":{
+        "name": "Starter",
+    },
+    "trait_jockeying":{
+        "name": "Jockeying",
+    },
+    "trait_comp_driver":{
+        "name": "Competitive Driver",
+    },
+    "trait_turf_lover":{
+        "name": "Turf Lover",
+    },
+    "trait_quick_speed":{
+        "name": "Quick Speed",
+    },
+    "trait_sprinter":{
+        "name": "Sprinter",
+    },
+    "trait_marathoner":{
+        "name": "Marathoner",
+    },
+    "trait_muddy_runner":{
+        "name": "Muddy Runner",
+    },
+    "trait_cold_killer":{
+        "name": "Cold Killer",
+    },
+    "trait_leader":{
+        "name": "Leader",
+    },
+    "trait_hunter":{
+        "name": "Hunter",
+    },
+    "trait_finisher":{
+        "name": "Finisher",
+    },
+    "trait_learner":{
+        "name": "Finisher",
+    },
+}
+
+const horseAnimationMappings = {
+    "TShake" : "Shake",
+    "TKickback" : "Kickback",
+    "TRearup" : "Rear Up",
+    "TNodno" : "Nod No",
+    "TNodyes" : "Nod Yes",
+}

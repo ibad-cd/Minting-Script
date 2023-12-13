@@ -191,7 +191,7 @@ async function main() {
 
     async function processHorses(horseData) {
         // Read the new CSV file with horseId and 
-        const csvPipe = fs.createReadStream('./horses_to_mint.csv').pipe(parse({ delimiter: ",", from_line: 2 }));
+        const csvPipe = fs.createReadStream('./csvs/horses_to_mint.csv').pipe(parse({ delimiter: ",", from_line: 2 }));
         csvPipe.on("data", async function (row) {
             csvPipe.pause();
             const horseId = row[0];
@@ -249,7 +249,7 @@ function gatherData(mintData, horseId) {
 
 // Function to write data to CSV file
 function writeToCsv(data) {
-    const csvFilePath = 'mintAudit.csv';
+    const csvFilePath = './csvs/mintAudit.csv';
 
     // Check if the file exists
     const fileExists = fs.existsSync(csvFilePath);
